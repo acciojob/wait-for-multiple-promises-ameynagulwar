@@ -1,82 +1,46 @@
 //your JS code here. If required.
-//your JS code here. If required.
-let tbody = document.getElementById("output");
+//your JS c
+function wait(time) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, time);
+  });
+}
 
-let timearr = [0,0,0];
-function timeadd (obj) {
-    switch (obj.time) {
-        case "time1":
-            timearr[0]=obj.timer;
-            break;
-        case "time2":
-            timearr[1]=obj.timer;
-             break;
-        case "time3":
-            timearr[2]=obj.timer;
-            break;  
-    }
+function getRandomTime() {
+  return Math.floor(Math.random() * 3000) + 1000; // Random time between 1 and 3 seconds
+}
+
+function addRow(table, data) {
+  const row = table.insertRow();
+  const cell1 = row.insertCell();
+  const cell2 = row.insertCell();
+  cell1.textContent = data[0];
+  cell2.textContent = data[1];
+}
+
+const table = document.getElementById('output');
+const loadingRow = table.insertRow();
+const loadingCell = loadingRow.insertCell();
+loadingCell.textContent = 'Loading...';
+loadingCell.colSpan = 2;
+
+const promises = [];
+for (let i = 0; i < 3; i++) {
+  const time = getRandomTime();
+  promises.push(wait(time).then(() => [`Promise ${i + 1}`, (time / 1000).toFixed(3)]));
+}
+
+Promise.all(promises)
+  .then((results) => {
+    table.deleteRow(loadingRow.rowIndex);
+    results.forEach((data) => {
+      addRow(table, data);
+    });
+    const totalTime = results.reduce((total, data) => total + parseFloat(data[1]), 0);
+    addRow(table, ['Total', totalTime.toFixed(3)]);
+  })
+  .catch((error) => {
+    console.error(error);
+  });
+
 	
-}
-
-let totaltime=0;
-
-let time1s = new Date().getTime();
-let promise1 =new Promise(func1);
-
-function func1(resolve) {
-	setTimeout(()=>{resolve();
-        let time1e=new Date().getTime();
-        let timetaken = (time1e-time1s)/1000;
-        let obj = { "time":"time1",
-                        "timer":timetaken}
-        timeadd(obj);
-        totaltime=totaltime+timetaken;},2000)
-}
-let time2s = new Date().getTime();
- let promise2 =new Promise(func2);
-
-
-function func2(resolve) {
-	setTimeout(()=>{
-     resolve();
-     let time2e=new Date().getTime();
-	let timetaken = (time2e-time2s)/1000;
-	let obj = { "time":"time2",
-                        "timer":timetaken}
-        timeadd(obj);
-	totaltime=totaltime+timetaken;
-    console.log(totaltime);
-    },1000)
-	
-}
-
-let time3s = new Date().getTime();
-let promise3 =new Promise(func3);
-
-
-function func3(resolve) {
-	setTimeout(()=>{
-        resolve();
-        let time3e = new Date().getTime();
-	let timetaken = (time3e-time3s)/1000;
-	let obj = { "time":"time3",
-                        "timer":timetaken}
-        timeadd(obj);
-	totaltime=totaltime+timetaken;
-    console.log(totaltime);
-    },3000)
-	
-}
-
-
-let finalPromise = Promise.all([promise1,promise2,promise3])
-
-finalPromise.then(addtoui);
-
-function addtoui() {
-	tbody.innerHTML="";
-	    tbody.innerHTML =`<tr> <td>Promise 1</td>  <td>${timearr[0]}</td> </tr>
-        <tr> <td>Promise 2</td> <td>${timearr[1]}</td> </tr>
-        <tr> <td>Promise 3</td> <td>${timearr[2]}</td> </tr>
-        <tr> <td>Total</td> <td>${totaltime}</td> </tr>`
-}
